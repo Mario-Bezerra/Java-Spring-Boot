@@ -63,6 +63,7 @@ public class TopicosController {
 	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) {
 	
 		Topico topico = form.toTopico(cursoRepository);
+		
 		topicoRepository.save(topico);
 		
 		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
