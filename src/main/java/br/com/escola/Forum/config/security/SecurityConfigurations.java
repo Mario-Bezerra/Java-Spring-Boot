@@ -12,6 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import br.com.escola.Forum.repository.UsuarioRepository;
 
 @SuppressWarnings("deprecation")
 @Configuration
@@ -21,6 +24,12 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private AutenticacaoService autenticacaoService; 
 	
+	@Autowired
+	private TokenServiceForum tokenService;
+	
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+	
 	// Configs para autorização
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -28,9 +37,12 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 		.antMatchers(HttpMethod.GET ,"/topicos").permitAll()
 		.antMatchers(HttpMethod.GET, "/topicos/*").permitAll()
 		.antMatchers(HttpMethod.POST, "/auth").permitAll()
+		.antMatchers(HttpMethod.GET, "/actuator").permitAll()
+		.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
 		.anyRequest().authenticated()
 		.and().csrf().disable()
-		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		.and().addFilterBefore(new AutenticacaoTokenFilter(tokenService, usuarioRepository), UsernamePasswordAuthenticationFilter.class);
 	}
 	
 	// Configs para autenticação
@@ -48,5 +60,10 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-	}	
+	    web.ignoring().antMatchers("/**.html"
+	    						 , "/v2/api-docs"
+	    						 , "/webjars/**"
+	    						 ,"/configuration/**"
+	    						 , "/swagger-resources/**");
+	}
 }
