@@ -129,4 +129,5 @@ public class Topico {
 	public void setRespostas(List<Resposta> respostas) {
 		this.respostas = respostas;
 	}
+
 }

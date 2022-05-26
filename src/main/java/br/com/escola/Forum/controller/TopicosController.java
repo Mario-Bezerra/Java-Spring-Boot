@@ -25,13 +25,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import br.com.escola.Forum.config.security.TokenServiceForum;
 import br.com.escola.Forum.controller.dto.DetalhesDoTopicoDto;
 import br.com.escola.Forum.controller.dto.TopicoDto;
 import br.com.escola.Forum.controller.form.AtualizarTopicoForm;
 import br.com.escola.Forum.controller.form.TopicoForm;
 import br.com.escola.Forum.modelo.Topico;
+import br.com.escola.Forum.modelo.Usuario;
 import br.com.escola.Forum.repository.CursoRepository;
 import br.com.escola.Forum.repository.TopicoRepository;
+import br.com.escola.Forum.repository.UsuarioRepository;
 
 @RestController
 @RequestMapping("/topicos")
@@ -42,6 +45,12 @@ public class TopicosController {
 	
 	@Autowired
 	private CursoRepository cursoRepository;
+	
+	@Autowired
+	private TokenServiceForum tokenService;
+	
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 	
 	@GetMapping
 	@Cacheable(value = "listaDeTopicos")
@@ -60,10 +69,11 @@ public class TopicosController {
 	@PostMapping
 	@Transactional
 	@CacheEvict (value = "listaDeTopicos", allEntries = true)
-	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) {
-	
+	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder, String token) {
+		Long usuarioId = tokenService.getIdUsuario(token);
 		Topico topico = form.toTopico(cursoRepository);
-		
+		Usuario usuario = usuarioRepository.findById(usuarioId).get();
+		topico.setAutor(usuario);
 		topicoRepository.save(topico);
 		
 		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
