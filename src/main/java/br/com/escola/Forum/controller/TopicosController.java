@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,7 +70,7 @@ public class TopicosController {
 	@PostMapping
 	@Transactional
 	@CacheEvict (value = "listaDeTopicos", allEntries = true)
-	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder, String token) {
+	public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder, @RequestHeader(value = "Authorization") String token) {
 		Long usuarioId = tokenService.getIdUsuario(token);
 		Topico topico = form.toTopico(cursoRepository);
 		Usuario usuario = usuarioRepository.findById(usuarioId).get();
